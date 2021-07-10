@@ -133,47 +133,35 @@
     <script src="../jquery.flot.barlabels.js"></script>
 
     <script type="text/javascript">
-      var apiUrl =
-        "https://corona.lmao.ninja/v2/countries/America?yesterday&strict&query%20";
-      fetch(apiUrl)
-        .then((response) => {
-          return response.json();
-        })
-        .then((data) => {
-          console.log(data);
-          // Work with JSON data here
+      $(document).ready(function () {
+        $.ajax({
+          async: false,
+          url: "https://corona.lmao.ninja/v2/countries/America?yesterday&strict&query%20",
+          contentType: "application/json",
+          dataType: "json",
+        }).then((data) => {
           $("#active").html(data.active);
           $("#confirmed").html(data.cases);
           $("#recovered").html(data.recovered);
           $("#death").html(data.deaths);
-        })
-        .catch((err) => {
-          // Do something for an error here
         });
-      $("#state-selection").change(function () {
-        var value = $(this).val();
-        console.log(value);
-      });
 
-      $(document).ready(function () {
+        $("#state-selection").change(function () {
+          var value = $(this).val();
+          console.log(value);
+        });
+
         function stateData(state) {
-          var returnValue;
-          var xhr = new XMLHttpRequest();
-          xhr.open(
-            "GET",
-            `https://corona.lmao.ninja/v2/states/${state}?yesterday=true`,
-            false
-          );
-
-          xhr.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-              var data = xhr.responseText;
-              returnValue = JSON.parse(data);
-            }
-          };
-
-          xhr.send();
-          return returnValue;
+          var returnedData;
+          $.ajax({
+            async: false,
+            url: `https://corona.lmao.ninja/v2/states/${state}?yesterday=true`,
+            contentType: "application/json",
+            dataType: "json",
+          }).then((data) => {
+            returnedData = data;
+          });
+          return returnedData;
         }
 
         var california = stateData("California");
