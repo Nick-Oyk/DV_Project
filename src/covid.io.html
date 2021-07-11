@@ -299,10 +299,10 @@
           }
         };
 
-        $(document).ready(function () {
-          $.plot($("#line-graph-cases"), dataset1, options);
-          $.plot($("#line-graph-death"), dataset2, options);
-        });
+    
+        $.plot("#line-graph-cases", dataset1, options);
+        $.plot("#line-graph-death", dataset2, options);
+       
       });
     </script>
   </body>
