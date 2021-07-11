@@ -47,6 +47,7 @@
         text-align: center;
         background-color: #f1f1f1;
       }
+
       .chart-card {
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
         padding: 50px;
@@ -55,30 +56,44 @@
         margin: 30px;
         height: 400px;
       }
+
       .header {
         text-align: left;
         color: #1abc9c;
         padding-left: 20px;
         font-size: 15px;
       }
+
       .content {
         padding: 20px;
       }
+
       .graph {
         width: 100%;
         height: 250px;
       }
+
       .selector {
         padding-right: 50px;
-        padding-top:25px;
+        padding-top: 25px;
         float: right;
       }
+
       .line-graph {
+        float: left;
+        width: 50%;
+      }
+      .pie-chart {
+        float: left;
+        width: 50%;
+      }
+      .placeholder-graph {
         float: left;
         width: 50%;
       }
     </style>
   </head>
+
   <body>
     <div class="header">
       <h1>Covid.io</h1>
@@ -88,68 +103,77 @@
         <div class="column">
           <div class="card">
             <h3 id="active"></h3>
-            <p>Active Cases in the USA</p>
+            <p><u>Active Cases in the USA</u></p>
           </div>
         </div>
 
         <div class="column">
           <div class="card">
             <h3 id="confirmed"></h3>
-            <p>Confirmed Cases in the USA</p>
+            <p><u>Confirmed Cases in the USA</u></p>
           </div>
         </div>
 
         <div class="column">
           <div class="card">
             <h3 id="recovered"></h3>
-            <p>Recovered Cases in the USA</p>
+            <p><u>Recovered Cases in the USA</u></p>
           </div>
         </div>
 
         <div class="column">
           <div class="card">
             <h3 id="death"></h3>
-            <p>Death Cases in the USA</p>
+            <p><u>Death Cases in the USA</u></p>
           </div>
         </div>
       </div>
     </div>
-  
 
-        <div class="chart-card">
-          <h2>Active Cases by State, USA</h2>
-          <div id="bar-graph" class="graph"></div>
-        </div>
- 
-      <div class="selector">
-        <label for="country">Choose a State:</label>
-        <select name="country" id="state-selection">
-          <option value="0">State</option>
-          <option value="California">California</option>
-          <option value="Virginia">Virginia</option>
-          <option value="Maryland">Maryland</option>
-          <option value="Kentucky">Kentucky</option>
-          <option value="Puerto Rico">Puerto Rico</option>
-        </select>
+    <div class="chart-card">
+      <h2><u>Active Cases by State, USA</u></h2>
+      <div id="bar-graph" class="graph"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="pie-chart">
+        <h3><u>Percentage of Cases, USA</u></h3>
+        <div id="pie-chart" class="graph"></div>
       </div>
-        <div class="chart-card">
-            <div class="line-graph">
-              <h3>State Cases over Time, USA</h3>
-              <h6>Please select a State</h6>
-              <div id="line-graph-cases" class="graph"></div>
-            </div>
-            <div class="line-graph">
-              <h3>State Deaths over Time, USA</h3>
-              <h6>Please select a State</h6>
-              <div id="line-graph-death" class="graph"></div>
-            </div>
-        </div>
-      
+      <div class="placeholder-graph">
+        <h3>Total Confirmed Deaths vs. Cases, USA</h3>
+        <div id="scatter-plot" class="graph"></div>
+      </div>
+    </div>
+
+    <div class="selector">
+      <label for="country">Choose a State:</label>
+      <select name="country" id="state-selection">
+        <option value="0">State</option>
+        <option value="California">California</option>
+        <option value="Virginia">Virginia</option>
+        <option value="Maryland">Maryland</option>
+        <option value="Kentucky">Kentucky</option>
+        <option value="Puerto Rico">Puerto Rico</option>
+      </select>
+    </div>
+    <div class="chart-card">
+      <div class="line-graph">
+        <h3><u>Total State Cases over Time, USA</u></h3>
+        <h6>*Please select a State*</h6>
+        <div id="line-graph-cases" class="graph"></div>
+      </div>
+      <div class="line-graph">
+        <h3><u>Total State Deaths over Time, USA</u></h3>
+        <h6>*Please select a State*</h6>
+        <div id="line-graph-death" class="graph"></div>
+      </div>
     </div>
 
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.pie.min.js"></script>
     <script src="../jquery.flot.barlabels.js"></script>
     <script src="../jquery.flot.tooltip.min.js"></script>
 
@@ -165,6 +189,53 @@
           $("#confirmed").html(data.cases);
           $("#recovered").html(data.recovered);
           $("#death").html(data.deaths);
+
+          var dataSet = [
+            { label: "Confirmed", data: data.cases, color: "#005CDE" },
+            { label: "Active", data: data.active, color: "#FFFF00" },
+            { label: "Recovered", data: data.recovered, color: "#00A36A" },
+            { label: "Death", data: data.deaths, color: "#FF0000" },
+          ];
+
+          function labelFormatter(label, series) {
+            return (
+              "<div style='font-size:8pt; text-align:center; padding:2px; color:black;'>" +
+              label +
+              "<br/>" +
+              Math.round(series.percent) +
+              "%</div>"
+            );
+          }
+
+          var options = {
+            series: {
+              pie: {
+                show: true,
+                innerRadius: 0.5,
+                label: {
+                  show: true,
+                  radius: 1,
+                  formatter: labelFormatter,
+                },
+              },
+            },
+            legend: {
+              position: "nw",
+            },
+            grid: {
+              hoverable: true,
+            },
+            tooltip: {
+              show: true,
+              content: "%p.0%, %s, total=%n", // show percentages, rounding to 2 decimal places
+              shifts: {
+                x: 20,
+                y: 0,
+              },
+            },
+          };
+
+          $.plot("#pie-chart", dataSet, options);
         });
 
         function stateData(state) {
@@ -222,6 +293,40 @@
         };
 
         $.plot("#bar-graph", [data], options);
+
+        $.ajax({
+          async: false,
+          url: "https://disease.sh/v3/covid-19/states",
+          contentType: "application/json",
+          dataType: "json",
+        }).then((data) => {
+          let corona_cases_deaths = [];
+          for (let i = 0; i < data.length; i += 1) {
+            corona_cases_deaths.push({
+              label: data[i].state,
+              data: [[data[i].cases, data[i].deaths]],
+            });
+          }
+
+          var options = {
+            series: {
+              points: {
+                radius: 3,
+                show: true,
+              },
+            },
+            grid: { hoverable: true },
+            tooltip: {
+              show: true,
+              content: "%s | Cases: %x; Deaths: %y",
+            },
+            legend: {
+              show: false,
+            },
+          };
+
+          $.plot("#scatter-plot", corona_cases_deaths, options);
+        });
       });
 
       $("#state-selection").change(function () {
@@ -272,12 +377,23 @@
         const deathData = listDeaths(returnedData);
 
         var dataset1 = [
-          { label: "Covid Cases", data: caseData, color: "#1abc9c", points: { fillColor: "#1abc9c", show: true }},
+          {
+            label: "Covid Cases",
+            data: caseData,
+            color: "#1abc9c",
+            points: { fillColor: "#1abc9c", show: true },
+          },
         ];
-        
+
         var dataset2 = [
-          { label: "Deaths", data: deathData, color: "#FF0000", points: { fillColor: "#FF0000", show: true }},
+          {
+            label: "Death Cases",
+            data: deathData,
+            color: "#FF0000",
+            points: { fillColor: "#FF0000", show: true },
+          },
         ];
+        console.log(dataset2);
 
         var options = {
           series: {
@@ -292,20 +408,18 @@
             timeformat: "%d/%m/%y",
             minTickSize: [1, "day"],
           },
-          grid:  { hoverable: true }, 
+          grid: { hoverable: true },
           tooltip: {
             show: true,
-            content: "%s | x: %x; y: %y"
+            content: "%s | Date: %x; Cases: %y",
           },
           legend: {
-            position: "nw"
-          }
+            position: "nw",
+          },
         };
 
-    
         $.plot("#line-graph-cases", dataset1, options);
         $.plot("#line-graph-death", dataset2, options);
-       
       });
     </script>
   </body>
