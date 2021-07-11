@@ -52,7 +52,8 @@
         padding: 50px;
         text-align: center;
         background-color: #f1f1f1;
-        margin: 10px;
+        margin: 30px;
+        height: 400px;
       }
       .header {
         text-align: left;
@@ -63,9 +64,18 @@
       .content {
         padding: 20px;
       }
-      .bar-graph {
+      .graph {
         width: 100%;
         height: 250px;
+      }
+      .selector {
+        padding-right: 40px;
+        padding-top:50px;
+        float: right;
+      }
+      .line-graph {
+        float: left;
+        width: 50%;
       }
     </style>
   </head>
@@ -104,39 +114,50 @@
         </div>
       </div>
     </div>
-    <div class="content">
+  
       <div class="row">
         <div class="chart-card">
-          <h2>Total Cases by State, USA</h2>
-
-          <div id="bar-graph" class="bar-graph"></div>
+          <h2>Active Cases by State, USA</h2>
+          <div id="bar-graph" class="graph"></div>
         </div>
       </div>
-      <div class="row">
+      <div class="selector">
+        <label for="country">Choose a State:</label>
+        <select name="country" id="state-selection">
+          <option value="0">State</option>
+          <option value="California">California</option>
+          <option value="Virginia">Virginia</option>
+          <option value="Maryland">Maryland</option>
+          <option value="Kentucky">Kentucky</option>
+          <option value="Puerto Rico">Puerto Rico</option>
+        </select>
+      </div>
         <div class="chart-card">
-          <h2>TITLE HEADING</h2>
-          <h5>Title description, Dec 7, 2017</h5>
-          <div class="fakeimg" style="height: 200px">Image</div>
-          <p>Some text..</p>
-          <p>
-            Sunt in culpa qui officia deserunt mollit anim id est laborum
-            consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-            labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco.
-          </p>
+            <div class="line-graph">
+              <h3>State Cases over Time, USA</h3>
+              <h6>Please select a State</h6>
+              <div id="line-graph-cases" class="graph"></div>
+            </div>
+            <div class="line-graph">
+              <h3>State Deaths over Time, USA</h3>
+              <h6>Please select a State</h6>
+              <div id="line-graph-death" class="graph"></div>
+            </div>
         </div>
-      </div>
+      
     </div>
 
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js"></script>
     <script src="../jquery.flot.barlabels.js"></script>
+    <script src="../jquery.flot.tooltip.min.js"></script>
 
     <script type="text/javascript">
       $(document).ready(function () {
         $.ajax({
           async: false,
-          url: "https://corona.lmao.ninja/v2/countries/America?yesterday&strict&query%20",
+          url: "https://disease.sh/v3/covid-19/countries/America",
           contentType: "application/json",
           dataType: "json",
         }).then((data) => {
@@ -146,16 +167,11 @@
           $("#death").html(data.deaths);
         });
 
-        $("#state-selection").change(function () {
-          var value = $(this).val();
-          console.log(value);
-        });
-
         function stateData(state) {
           var returnedData;
           $.ajax({
             async: false,
-            url: `https://corona.lmao.ninja/v2/states/${state}?yesterday=true`,
+            url: `https://disease.sh/v3/covid-19/states/${state}`,
             contentType: "application/json",
             dataType: "json",
           }).then((data) => {
@@ -167,15 +183,15 @@
         var california = stateData("California");
         var virginia = stateData("Virginia");
         var maryland = stateData("Maryland");
-        var kentucky = stateData("Kentucky");
         var washington = stateData("Washington");
+        var puertoRico = stateData("Puerto Rico");
 
         var data = [
           [0, california.active],
           [1, virginia.active],
           [2, maryland.active],
-          [3, kentucky.active],
-          [4, washington.active],
+          [3, washington.active],
+          [4, puertoRico.active],
         ];
 
         var options = {
@@ -195,8 +211,8 @@
               [0, "California"],
               [1, "Virginia"],
               [2, "Maryland"],
-              [3, "Kentucky"],
-              [4, "Washington"],
+              [3, "Washington"],
+              [4, "Puerto Rico"],
             ],
           },
           grid: {
@@ -206,6 +222,87 @@
         };
 
         $.plot("#bar-graph", [data], options);
+      });
+
+      $("#state-selection").change(function () {
+        $("h6").hide();
+        var state = $(this).val();
+        var data1 = [
+          [1, 130],
+          [2, 40],
+          [3, 80],
+          [4, 160],
+          [5, 159],
+          [6, 370],
+          [7, 330],
+          [8, 350],
+          [9, 370],
+          [10, 400],
+          [11, 330],
+          [12, 350],
+        ];
+
+        var returnedData;
+        $.ajax({
+          async: false,
+          url: `https://disease.sh/v3/covid-19/nyt/states/${state}?lastdays=30`,
+          contentType: "application/json",
+          dataType: "json",
+        }).then((data) => {
+          returnedData = data;
+        });
+
+        function listCases(cases) {
+          let corona_cases = [];
+          for (let i = 0; i < cases.length; i += 1) {
+            corona_cases.push([new Date(cases[i].date), cases[i].cases]);
+          }
+          return corona_cases;
+        }
+
+        function listDeaths(deaths) {
+          let corona_deaths = [];
+          for (let i = 0; i < deaths.length; i += 1) {
+            corona_deaths.push([new Date(deaths[i].date), deaths[i].deaths]);
+          }
+          return corona_deaths;
+        }
+
+        const caseData = listCases(returnedData);
+        const deathData = listDeaths(returnedData);
+
+        var dataset1 = [
+          { label: "Covid Cases", data: caseData, color: "#1abc9c", points: { fillColor: "#1abc9c", show: true }},
+        ];
+        
+        var dataset2 = [
+          { label: "Deaths", data: deathData, color: "#FF0000", points: { fillColor: "#FF0000", show: true }},
+        ];
+
+        var options = {
+          series: {
+            lines: { show: true },
+            points: {
+              radius: 3,
+              show: true,
+            },
+          },
+          xaxis: {
+            mode: "time",
+            timeformat: "%d/%m/%y",
+            minTickSize: [1, "day"],
+          },
+          grid:  { hoverable: true }, 
+          tooltip: {
+            show: true,
+            content: "%s | x: %x; y: %y"
+          }
+        };
+
+        $(document).ready(function () {
+          $.plot($("#line-graph-cases"), dataset1, options);
+          $.plot($("#line-graph-death"), dataset2, options);
+        });
       });
     </script>
   </body>
