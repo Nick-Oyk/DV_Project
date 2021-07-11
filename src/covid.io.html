@@ -69,8 +69,8 @@
         height: 250px;
       }
       .selector {
-        padding-right: 40px;
-        padding-top:50px;
+        padding-right: 50px;
+        padding-top:25px;
         float: right;
       }
       .line-graph {
@@ -115,12 +115,12 @@
       </div>
     </div>
   
-      <div class="row">
+
         <div class="chart-card">
           <h2>Active Cases by State, USA</h2>
           <div id="bar-graph" class="graph"></div>
         </div>
-      </div>
+ 
       <div class="selector">
         <label for="country">Choose a State:</label>
         <select name="country" id="state-selection">
@@ -296,6 +296,9 @@
           tooltip: {
             show: true,
             content: "%s | x: %x; y: %y"
+          },
+          legend: {
+            position: "nw"
           }
         };
 
