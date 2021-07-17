@@ -182,7 +182,7 @@
       $(document).ready(function () {
         $.ajax({
           async: false,
-          url: "https://disease.sh/v3/covid-19/countries/America",
+          url: "https://disease.sh/v3/covid-19/countries/America", //connect to the API to display data
           contentType: "application/json",
           dataType: "json",
         }).then((data) => {
@@ -197,6 +197,8 @@
             { label: "Recovered", data: data.recovered, color: "#00A36A" },
             { label: "Death", data: data.deaths, color: "#FF0000" },
           ];
+          
+          
 
           function labelFormatter(label, series) {
             return (
@@ -316,7 +318,7 @@
                 show: true,
               },
             },
-            grid: { hoverable: true },
+            grid: { hoverable: true }, //to enablr the hovering feature 
             tooltip: {
               show: true,
               content: "%s | Cases: %x; Deaths: %y",
@@ -325,10 +327,10 @@
               show: false,
             },
             zoom: {
-              interactive: true,
+              interactive: true, //to enable the zoom in and zoom out feature 
             },
             pan: {
-              interactive: true,
+              interactive: true, //to enable the panning feature 
             },
           };
 
